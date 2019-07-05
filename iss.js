@@ -34,5 +34,67 @@ const fetchMyIP = function(callback) {
   });
 };
 
-//console.log(fetchMyIP());
-module.exports = { fetchMyIP };
+const fetchCoordsByIp = (ip, callback) => {
+
+  request(`https://ipvigilante.com/${ip}`, (error, response, body) => {
+
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching Coordinates.`;
+      callback(Error(msg), null);
+      return;
+    }
+    //console.log(body);
+    const coordinates = {};
+    //console.log(JSON.parse(body).data.latitude)
+    
+    coordinates.latitude = JSON.parse(body).data.latitude;
+    coordinates.longitude = JSON.parse(body).data.longitude;
+
+    
+
+    if (error) {
+      callback(error, null);
+    } else {
+      callback(null, coordinates);
+    }
+
+  });
+
+};
+
+const fetchISSFlyOverTimes = function(coords, callback) {
+
+  request(`http://api.open-notify.org/iss-pass.json?lat=${coords.latitude}&lon=${coords.longitude}`, (error, response, body) => {
+
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching flyovers.`;
+      callback(Error(msg), null);
+      return;
+    }
+    
+    const flyovers = JSON.parse(body).response;
+    
+
+    if (error) {
+      callback(error, null);
+    } else {
+      callback(null, flyovers);
+    }
+
+  });
+
+};
+
+
+module.exports = { fetchMyIP,
+  fetchCoordsByIp, fetchISSFlyOverTimes };
